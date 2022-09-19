@@ -6,6 +6,16 @@ header("Content-type: text/html;charset=utf-8");
 if($_SERVER["REQUEST_METHOD"] === "POST"){
     require "inc/class.sms.php";
 	$telNum = isset($_POST["numbler"]) ? $_POST["numbler"] : "";
+	$smsType = isset($_POST["numbler"]) && $_POST["numbler"] == "3" ? "3" : "0";
+	$smsInfo = array(
+		array("code" => rand(100000, 999999) ."[模拟用]"),
+		array(),
+		array(),
+		array(
+		    "user"      => $_SERVER["REMOTE_ADDR"],
+			"from_name" => "QQ群(23189103)"	// 随机验证码
+		)
+	);
 	$cfg = array(
 		"openid"	=> "74",	// http://dev.quanmwl.com/console
 		"apikey"	=> "3745dad31b259cb7b0a0e3727bc8e642"	// http://dev.quanmwl.com/ability_sms
@@ -32,12 +42,10 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
 	//	"ssl" => true
 	//));
 
-	//$res = $run->sms("0", array("code" => "[模拟用]"))->send($telNum);
+	//$res = $run->sms($smsType, array("code" => rand(100000, 999999) ."[模拟用]"))->send($telNum);
 	$res = $run->sms(
-		"0",	// 短信模板ID
-		array(
-			"code" => rand(100000, 999999) ."[测试用]"	// 随机验证码
-		)
+		$smsType,	// 短信模板ID
+		$smsInfo[$smsType]
 	)->send($telNum);	// 发送目标
 
 	$msg = isset($res) && is_array($res) ? "<strong>{$res['tel']}</strong> [{$res['code']}] {$res['msg']}" : $res;
@@ -63,7 +71,9 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
 	<body>
 		<form method="post">
 		    <p><?php echo isset($msg) ? $msg : "请输入长度为11位的中国号码";?></p>
-			<input type="text" name="numbler" id="numbler" autocomplete="off" x-webkit-speech="false" spellcheck="false" onmouseOver="this.focus();" autofocus="autofocus" onchange="this.value=this.value.replace(/[^\d]+/is, '');" placeholder="请输入长度为11位的中国号码" />
+			<p><input type="radio" name="type" value="1" id="reg" /><label for="reg">注册验证</label>
+			<input type="radio" name="type" value="3" id="tip" /><label for="tip">用户通知</label></p>
+			<input type="text" name="numbler" id="numbler" autocomplete="off" x-webkit-speech="false" spellcheck="false" onmouseOver="this.focus();" autofocus="autofocus" onChange="this.value=this.value.replace(/[^\d]+/is, '');" placeholder="请输入长度为11位的中国号码" />
 			<input type="submit" value="发送" />
 		</form>
 		<fieldset>
